@@ -1,4 +1,12 @@
 package com.accenture.franchiseapi.infrastructure.drivenadapters.persistencemongo.repository;
 
-public interface FranchiseReactiveMongoRepository {
+import com.accenture.franchiseapi.infrastructure.drivenadapters.persistencemongo.document.FranchiseDocument;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
+@Repository
+public interface FranchiseReactiveMongoRepository extends ReactiveMongoRepository<FranchiseDocument, String> {
+
+    Mono<FranchiseDocument> findByName(String name);
 }
