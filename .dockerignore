@@ -1,0 +1,7 @@
+target/
+.git/
+.idea/
+*.iml
+.mvn/
+INFORME_AUDITORIA.md
+ARCHITECTURE.md
