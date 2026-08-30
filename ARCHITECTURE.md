@@ -25,7 +25,7 @@
 
 ## 0. Enunciado de la prueba y criterios de evaluación
 
-Se requiere construir un API para manejar una lista de franquicias. Una franquicia se compone de un nombre y una lista de sucursales; a su vez, una sucursal está compuesta por un nombre y un listado de productos ofertados en la sucursal. Un producto se compone de un nombre y una cantidad de stock.
+Se requiere construir una API para manejar una lista de franquicias. Una franquicia se compone de un nombre y una lista de sucursales; a su vez, una sucursal está compuesta por un nombre y un listado de productos ofertados en la sucursal. Un producto se compone de un nombre y una cantidad de stock.
 
 ### Aspectos fundamentales de evaluación
 
