@@ -1,7 +1,10 @@
 package com.accenture.franchiseapi.infrastructure.drivenadapters.cacheredis;
 
 import com.accenture.franchiseapi.domain.model.Product;
+import com.accenture.franchiseapi.domain.port.BranchRepository;
 import com.accenture.franchiseapi.domain.port.ProductRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -11,18 +14,22 @@ import java.time.Duration;
 import java.util.List;
 
 @Component
+@Primary
 public class CachedProductRepository implements ProductRepository {
 
     private final ProductRepository delegate;
+    private final BranchRepository branchRepository;
     private final ReactiveRedisTemplate<String, String> template;
     private final TopStockRedisCache topStockCache;
     private static final String BRANCH_CACHE_PREFIX = "branch:";
     private static final Duration BRANCH_TTL = Duration.ofMinutes(15);
 
     public CachedProductRepository(ProductRepository delegate,
-                                   ReactiveRedisTemplate<String, String> template,
+                                   BranchRepository branchRepository,
+                                   @Qualifier("reactiveRedisTemplate") ReactiveRedisTemplate<String, String> template,
                                    TopStockRedisCache topStockCache) {
         this.delegate = delegate;
+        this.branchRepository = branchRepository;
         this.template = template;
         this.topStockCache = topStockCache;
     }
@@ -85,10 +92,16 @@ public class CachedProductRepository implements ProductRepository {
         return delegate.findByBranchIdIn(branchIds);
     }
 
+    @Override
+    public Flux<Product> findByIdIn(List<String> ids) {
+        return delegate.findByIdIn(ids);
+    }
+
     private Mono<Void> invalidateBranchCache(String branchId) {
         String cacheKey = BRANCH_CACHE_PREFIX + branchId;
         return template.delete(cacheKey)
-            .then(topStockCache.evict(branchId));
+            .then(branchRepository.findById(branchId))
+            .flatMap(branch -> topStockCache.evict(branch.getFranchiseId()));
     }
 
     private Mono<Void> markBranchCached(String branchId) {

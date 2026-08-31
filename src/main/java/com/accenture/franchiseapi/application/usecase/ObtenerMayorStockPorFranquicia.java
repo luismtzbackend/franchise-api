@@ -31,9 +31,9 @@ public class ObtenerMayorStockPorFranquicia {
                 if (productIds == null || productIds.isEmpty()) {
                     return Flux.empty();
                 }
-                return productRepository.findByBranchIdIn(productIds);
+                return productRepository.findByIdIn(productIds);
             })
-            .switchIfEmpty(consultarProductosYCachear(franchiseId));
+            .switchIfEmpty(Flux.defer(() -> consultarProductosYCachear(franchiseId)));
     }
 
     private Flux<Product> consultarProductosYCachear(String franchiseId) {

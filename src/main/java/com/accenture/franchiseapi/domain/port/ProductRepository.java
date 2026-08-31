@@ -21,4 +21,6 @@ public interface ProductRepository {
     Mono<Product> updateName(String id, String name);
 
     Flux<Product> findByBranchIdIn(java.util.List<String> branchIds);
+
+    Flux<Product> findByIdIn(java.util.List<String> ids);
 }

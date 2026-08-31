@@ -74,7 +74,13 @@ public class ProductMongoRepository implements ProductRepository {
 
     @Override
     public Flux<Product> findByBranchIdIn(List<String> branchIds) {
-        return reactiveRepository.findByIdIn(branchIds)
+        return reactiveRepository.findByBranchIdIn(branchIds)
+            .map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<Product> findByIdIn(List<String> ids) {
+        return reactiveRepository.findByIdIn(ids)
             .map(mapper::toDomain);
     }
 }

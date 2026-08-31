@@ -14,4 +14,6 @@ public interface ProductReactiveMongoRepository extends ReactiveMongoRepository<
     Mono<ProductDocument> findTopByBranchIdOrderByStockDesc(String branchId);
 
     Flux<ProductDocument> findByIdIn(java.util.List<String> ids);
+
+    Flux<ProductDocument> findByBranchIdIn(java.util.List<String> branchIds);
 }

@@ -1,6 +1,7 @@
 package com.accenture.franchiseapi.infrastructure.drivenadapters.cacheredis;
 
 import com.accenture.franchiseapi.domain.port.TopStockCache;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -15,7 +16,7 @@ public class TopStockRedisCache implements TopStockCache {
     private static final String KEY_PREFIX = "top-stock:";
     private static final Duration TTL = Duration.ofHours(1);
 
-    public TopStockRedisCache(ReactiveRedisTemplate<String, String> template) {
+    public TopStockRedisCache(@Qualifier("reactiveRedisTemplate") ReactiveRedisTemplate<String, String> template) {
         this.template = template;
     }
 
