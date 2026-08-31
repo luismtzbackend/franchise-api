@@ -1,6 +1,7 @@
 package com.accenture.franchiseapi.application.usecase;
 
 import com.accenture.franchiseapi.domain.model.Branch;
+import com.accenture.franchiseapi.domain.model.exceptions.EntityNotFound;
 import com.accenture.franchiseapi.domain.port.BranchRepository;
 import com.accenture.franchiseapi.domain.port.FranchiseRepository;
 import reactor.core.publisher.Mono;
@@ -17,7 +18,7 @@ public class AgregarSucursal {
 
     public Mono<Branch> ejecutar(String franchiseId, String nombre) {
         return franchiseRepository.findById(franchiseId)
-            .switchIfEmpty(Mono.error(new IllegalArgumentException("La franquicia no existe")))
+            .switchIfEmpty(Mono.error(new EntityNotFound("franquicia", franchiseId)))
             .then(Mono.fromCallable(() -> Branch.builder()
                 .name(nombre)
                 .franchiseId(franchiseId)
