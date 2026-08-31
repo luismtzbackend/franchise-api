@@ -37,16 +37,12 @@ Levanta la app (8080), MongoDB (27017) y Redis (6379) en la misma red. `docker l
 
 ## Despliegue en AWS EC2
 
-Corriendo en una instancia EC2, con el puerto 8080 abierto en el security group.
+La API está corriendo en una instancia EC2 con Docker.
 
-`http://3.19.237.215:8080` — sin dominio DuckDNS todavía, se pega directo a la IP.
-
-Prueba real:
+URL pública:
 
 ```
-POST http://3.19.237.215:8080/api/franchises
-Body: {"nombre":"PruebaEC2"}
-201 Created — {"id":"6a95198cafa78a8fc9dbebb7","nombre":"PruebaEC2"}
+http://franchise-api.duckdns.org:8080
 ```
 
 ## Variables de entorno
