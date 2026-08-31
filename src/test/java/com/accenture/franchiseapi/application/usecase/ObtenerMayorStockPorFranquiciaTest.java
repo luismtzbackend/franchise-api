@@ -47,7 +47,7 @@ class ObtenerMayorStockPorFranquiciaTest {
 
         when(topStockCache.get("f-1"))
                 .thenReturn(Mono.just(Arrays.asList("p-1", "p-2")));
-        when(productRepository.findByBranchIdIn(Arrays.asList("p-1", "p-2")))
+        when(productRepository.findByIdIn(Arrays.asList("p-1", "p-2")))
                 .thenReturn(Flux.just(producto1, producto2));
 
         StepVerifier.create(obtenerMayorStockPorFranquicia.ejecutar("f-1"))

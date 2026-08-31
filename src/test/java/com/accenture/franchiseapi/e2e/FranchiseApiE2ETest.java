@@ -28,7 +28,7 @@ class FranchiseApiE2ETest {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
         registry.add("spring.data.redis.host", redisContainer::getHost);
         registry.add("spring.data.redis.port", () -> redisContainer.getFirstMappedPort());
     }
@@ -40,7 +40,7 @@ class FranchiseApiE2ETest {
     @Test
     void debeCrearFranquiciaYValidarRespuesta() {
         webTestClient.post()
-                .uri("/franchises")
+                .uri("/api/franchises")
                 .bodyValue(new CreateFranchiseRequestDto("Franquicia Test E2E"))
                 .exchange()
                 .expectStatus().isCreated()
@@ -53,12 +53,11 @@ class FranchiseApiE2ETest {
         String franchiseId = crearFranquicia("Franquicia Test");
 
         webTestClient.post()
-                .uri("/franchises/{id}/branches", franchiseId)
+                .uri("/api/franchises/{id}/branches", franchiseId)
                 .bodyValue(new AddBranchRequestDto("Sucursal Central"))
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody()
-                .jsonPath("$.nombre").isEqualTo("Sucursal Central");
+                .expectHeader().exists("Location");
     }
 
     @Test
@@ -67,7 +66,7 @@ class FranchiseApiE2ETest {
         String branchId = crearSucursal(franchiseId, "Sucursal Test");
 
         webTestClient.post()
-                .uri("/branches/{id}/products", branchId)
+                .uri("/api/branches/{id}/products", branchId)
                 .bodyValue(new AddProductRequestDto("Café Premium", 100))
                 .exchange()
                 .expectStatus().isCreated()
@@ -83,7 +82,7 @@ class FranchiseApiE2ETest {
         String productId = crearProducto(branchId, "Café", 100);
 
         webTestClient.patch()
-                .uri("/products/{id}/stock", productId)
+                .uri("/api/products/{id}/stock", productId)
                 .bodyValue(new UpdateStockRequestDto(250))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -95,8 +94,8 @@ class FranchiseApiE2ETest {
         String branchId = crearSucursal(franchiseId, "Sucursal Test");
         String productId = crearProducto(branchId, "Café Viejo", 100);
 
-        webTestClient.patch()
-                .uri("/products/{id}/name", productId)
+        webTestClient.put()
+                .uri("/api/products/{id}/name", productId)
                 .bodyValue(new UpdateNameRequestDto("Café Nuevo"))
                 .exchange()
                 .expectStatus().isNoContent();
@@ -109,7 +108,7 @@ class FranchiseApiE2ETest {
         String productId = crearProducto(branchId, "Café", 100);
 
         webTestClient.delete()
-                .uri("/products/{id}", productId)
+                .uri("/api/products/{id}", productId)
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -125,17 +124,17 @@ class FranchiseApiE2ETest {
         crearProducto(branchId2, "Azúcar", 150);
 
         webTestClient.get()
-                .uri("/franchises/{id}/top-stock", franchiseId)
+                .uri("/api/franchises/{id}/top-stock", franchiseId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].nombreProducto").isEqualTo("Café")
-                .jsonPath("$[1].nombreProducto").isEqualTo("Azúcar");
+                .jsonPath("$[0].nombre").isEqualTo("Café")
+                .jsonPath("$[1].nombre").isEqualTo("Azúcar");
     }
 
     private String crearFranquicia(String nombre) {
         return webTestClient.post()
-                .uri("/franchises")
+                .uri("/api/franchises")
                 .bodyValue(new CreateFranchiseRequestDto(nombre))
                 .exchange()
                 .expectStatus().isCreated()
@@ -146,20 +145,22 @@ class FranchiseApiE2ETest {
     }
 
     private String crearSucursal(String franchiseId, String nombre) {
-        return webTestClient.post()
-                .uri("/franchises/{id}/branches", franchiseId)
+        String location = webTestClient.post()
+                .uri("/api/franchises/{id}/branches", franchiseId)
                 .bodyValue(new AddBranchRequestDto(nombre))
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(BranchResponseDto.class)
+                .expectBody()
                 .returnResult()
-                .getResponseBody()
-                .id();
+                .getResponseHeaders()
+                .getLocation()
+                .getPath();
+        return location.substring(location.lastIndexOf('/') + 1);
     }
 
     private String crearProducto(String branchId, String nombre, int stock) {
         return webTestClient.post()
-                .uri("/branches/{id}/products", branchId)
+                .uri("/api/branches/{id}/products", branchId)
                 .bodyValue(new AddProductRequestDto(nombre, stock))
                 .exchange()
                 .expectStatus().isCreated()
@@ -175,6 +176,5 @@ class FranchiseApiE2ETest {
     record UpdateStockRequestDto(int stock) {}
     record UpdateNameRequestDto(String nombre) {}
     record FranchiseResponseDto(String id, String nombre) {}
-    record BranchResponseDto(String id, String nombre) {}
     record ProductResponseDto(String id, String nombre) {}
 }

@@ -46,9 +46,6 @@ class CrearFranquiciaTest {
 
     @Test
     void debeValidarNombreNoVacio() {
-        when(franchiseRepository.save(any(Franchise.class)))
-                .thenReturn(Mono.error(new IllegalArgumentException("El nombre de la franquicia es obligatorio")));
-
         StepVerifier.create(crearFranquicia.ejecutar(""))
                 .expectError(IllegalArgumentException.class)
                 .verify();
